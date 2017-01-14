@@ -1,0 +1,2 @@
+Click on google drive link to download pretrained vgg16 cnn weights - 
+https://drive.google.com/file/d/0B4sNPP0Fo3ZZOHdzdDVXcjJxWEU/view
