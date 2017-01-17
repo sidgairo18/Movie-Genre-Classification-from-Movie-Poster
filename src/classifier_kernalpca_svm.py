@@ -4,7 +4,11 @@ from scipy import exp
 from scipy.linalg import eigh
 from sklearn import svm, preprocessing
 import numpy as np
+import pdb
 
+#labels - 0 for action, 1 for adventure, 2 for animation, 3 biography, 4 for comedy
+
+features_dir = ['./features/FC7_Features_Action.txt','./features/FC7_Features_Adventure.txt', './features/FC7_Features_Animation.txt']#, './features/FC7_Features_Biography.txt', './features/FC7_Features_Comedy.txt']
 
 def change(k):
     
@@ -17,54 +21,78 @@ def change(k):
 
 def reading():                                                          
                                                                         
-    f = open('./data/arcene_train.data', 'r')                                                                   
-    #f = open('./data2/madelon_train.data', 'r')                                                                   
-    print "Reading data"                                                
-    first = f.readline().split()
-    first = list(map(int, first))                                       
-                                                                        
-    data = np.asarray(first)                                             
-    
-    for line in f:                                                      
-        l = line.split()                                                
-        l = list(map(int, l))                                           
-        data = np.vstack((data, l))                           
-                                                                        
-    f.close()
+    f = open('./features/FC7_Features_Action.txt', 'r')
 
-    f = open('./data/arcene_train.labels')
-    #f = open('./data2/madelon_train.labels')
+    print "Reading data"                 
+    first = f.readline().split()
+    first = list(map(float, first))                                       
+                                                                        
+    data = np.asarray(first)
+    train_count = 100
+    index = 1
+
+    for i in range(len(features_dir)):
+
+        print "Reading file", features_dir[i]
+        
+        for line in f:
+            l = line.split()
+            l = list(map(float, l))                                           
+            data = np.vstack((data, l))
+            index += 1
+            if index >= train_count:
+                break
+
+        f.close()
+        if (i+1) < len(features_dir):
+            f = open(features_dir[i+1], 'r')
+            index = 0
+
+    print "Setting Labels"
     l1 = []
-    print "Reading training labels"
-    for line in f:
-        l1.append(int(line))
-    f.close()
-    
-    f = open('./data/arcene_valid.data', 'r')                                                                   
-    #f = open('./data2/madelon_valid.data', 'r')                                                                   
-    print "Reading validation data"
-
-    first = f.readline().split()
-    first = list(map(int, first))                                       
-                                                                        
-    data2 = np.asarray(first)                                             
-    
-    for line in f:                                                      
-        l = line.split()                                                
-        l = list(map(int, l))                                           
-        data2 = np.vstack((data2, l))                           
-                                                                        
-    f.close()
-    
-    f = open('./data/arcene_valid.labels')
-    #f = open('./data2/madelon_valid.labels')
     l2 = []
-    print "Reading valid labels"
-    for line in f:
-        l2.append(int(line))
-    f.close()
 
-    print "Reading Complete"                                            
+    for i in range(len(features_dir)):
+        for j in range(100):
+            l1.append(i)
+            l2.append(i)
+    
+    f = open('./features/FC7_Features_Action.txt', 'r')
+    print "Reading validation data"
+    
+    index = 0
+    for line in f:
+        if index == train_count:
+            first = line.split()
+            break
+        index += 1
+
+    first = list(map(float, first))                                       
+                                                                        
+    data2 = np.asarray(first)
+    test_count = 100
+    index = train_count + 1
+
+    for i in range(len(features_dir)):
+
+        print "Reading file", features_dir[i]
+        
+        for line in f:
+            l = line.split()
+            l = list(map(float, l))
+            if index >= train_count:
+                data2 = np.vstack((data2, l))
+            index += 1
+            if index >= (train_count+test_count):
+                break
+
+        f.close()
+        if (i+1) < len(features_dir):
+            f = open(features_dir[i+1], 'r')
+            index = 0
+    
+    print "Reading Complete"
+
     return data, data2, l1, l2
 
 def kernel_pca(data, gamma, n_components):
@@ -109,6 +137,7 @@ def kernel_lda(data, l1, gamma):
    n2 = k2.T.dot((np.identity(s2)-one2).dot(k2))
 
    n = n1+n2
+   
     
    a = np.linalg.inv(n).dot((mean2-mean1).T)
    print "lda ends"
@@ -122,7 +151,7 @@ if __name__ == "__main__":
     data_copy = np.copy(data)
     data3 = np.copy(data)
     
-    asd = kernel_lda(data, l1, gamma)
+    #asd = kernel_lda(data, l1, gamma)
 
     e, k = kernel_pca(data, gamma, 100)
     
@@ -157,6 +186,7 @@ if __name__ == "__main__":
 
 
     output = clf.predict(preprocessing.scale(k_new))
+    print output
     
     hits = 0
     for i in range(len(l2)):
@@ -164,6 +194,8 @@ if __name__ == "__main__":
             hits += 1
     
     print hits
+
+    exit()
     
     asd = np.asarray(asd)
 
