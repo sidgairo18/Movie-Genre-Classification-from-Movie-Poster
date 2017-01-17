@@ -53,9 +53,8 @@ def reading():
     l2 = []
 
     for i in range(len(features_dir)):
-        for j in range(100):
+        for j in range(train_count):
             l1.append(i)
-            l2.append(i)
     
     f = open('./features/FC7_Features_Action.txt', 'r')
     print "Reading validation data"
@@ -90,6 +89,10 @@ def reading():
         if (i+1) < len(features_dir):
             f = open(features_dir[i+1], 'r')
             index = 0
+    
+    for i in range(len(features_dir)):
+        for j in range(test_count):
+            l2.append(i)
     
     print "Reading Complete"
 
@@ -186,7 +189,6 @@ if __name__ == "__main__":
 
 
     output = clf.predict(preprocessing.scale(k_new))
-    print output
     
     hits = 0
     for i in range(len(l2)):
@@ -194,6 +196,7 @@ if __name__ == "__main__":
             hits += 1
     
     print hits
+    print "Accuracy", float(hits)/len(l2)*100
 
     exit()
     
